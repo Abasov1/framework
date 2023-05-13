@@ -1,0 +1,21 @@
+{
+    "name": "abasov1/mvc_framework",
+    "autoload": {
+        "psr-4": {
+            "Maqadesem\\MvcFramework\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Abasov1"
+        }
+    ],
+    "autoload":{
+        "psr-4":{
+            "app\\": "./"
+        }
+    },
+    "require": {
+        "vlucas/phpdotenv": "^5.5"
+    }
+}
