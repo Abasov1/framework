@@ -35,7 +35,7 @@ foreach ($foldersToMove as $folder) {
 
     rename($sourceLocation, $destination);
 }
-unlink($dir . '/' . 'README.md');
+unlink($now . '/' . 'README.md');
 unlink(__FILE__);
 
 ?>
