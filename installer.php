@@ -1,9 +1,7 @@
 <?php 
 
 $now = __DIR__;
-$abasov1 = dirname(__DIR__);
-$vendor = dirname($abasov1);
-$dir = dirname($vendor);
+$dir = dirname($now);
 
 $foldersToMove = [
     'controllers',
