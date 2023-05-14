@@ -13,6 +13,7 @@ $foldersToMove = [
     'requests',
     'routes',
     'views',
+    '.env',
     '.env.example',
     '.gitignore',
     'composer.json',
