@@ -16,7 +16,7 @@
         "vlucas/phpdotenv": "^5.5"
     },
     "scripts": {
-        "post-autoload-dump": [
+        "post-package-install": [
             "php installer.php"
         ]
     }
