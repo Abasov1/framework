@@ -16,8 +16,8 @@
         "vlucas/phpdotenv": "^5.5"
     },
     "scripts": {
-        "post-package-install": [
-            "php installer.php"
+        "post-install-cmd": [
+            "echo 'Running post-install script'"
         ]
     }
 }
