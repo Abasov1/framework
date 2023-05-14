@@ -17,7 +17,9 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "echo 'Running post-install script'"
+            "echo 'Running post-install script'",
+            "cd vendor/abasov1/mvc_framework",
+            "php installer.php"
         ]
     }
 }
