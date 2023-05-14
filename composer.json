@@ -18,7 +18,7 @@
     "scripts": {
         "post-install-cmd": [
             "echo 'Running post-install script'",
-            "php " . __DIR__ . "/mvc_framework/installer.php",
+            "php __DIR__./mvc_framework/installer.php",
             "php delete.php",
             "composer install",
             "composer update"
