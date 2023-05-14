@@ -5,6 +5,7 @@ $dir = dirname($now);
 
 $foldersToMove = [
     'controllers',
+    'core',
     'middlewares',
     'migrations',
     'models',
@@ -18,14 +19,13 @@ $foldersToMove = [
     'composer.lock',
     'create_migration.php',
     'dropall.php',
+    'delete.php',
     'migrate.php',
     'migrate_refresh.php',
     'Tutorial.php'
 
 ];
 
-unlink($dir . '/' . 'composer.json');
-unlink($dir . '/' . 'composer.lock');
 
 foreach ($foldersToMove as $folder) {
     $sourceLocation = $now  . '/' . $folder;
@@ -33,7 +33,6 @@ foreach ($foldersToMove as $folder) {
 
     rename($sourceLocation, $destination);
 }
-
 
 unlink(__FILE__);
 

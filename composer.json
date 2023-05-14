@@ -18,8 +18,12 @@
     "scripts": {
         "post-install-cmd": [
             "echo 'Running post-install script'",
-            "cd vendor/abasov1/mvc_framework",
-            "php installer.php"
+            "cd mvc_framework",
+            "php installer.php",
+            "cd..",
+            "php delete.php",
+            "composer install",
+            "composer update"
         ]
     }
 }
