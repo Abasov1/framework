@@ -1,5 +1,7 @@
 {
     "name": "abasov1/mvc_framework",
+    "type":"project",
+    "license":"MIT",
     "authors": [
         {
             "name": "Abasov1"
