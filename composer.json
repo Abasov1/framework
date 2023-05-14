@@ -1,10 +1,5 @@
 {
     "name": "abasov1/mvc_framework",
-    "autoload": {
-        "psr-4": {
-            "Maqadesem\\MvcFramework\\": "src/"
-        }
-    },
     "authors": [
         {
             "name": "Abasov1"
@@ -17,5 +12,6 @@
     },
     "require": {
         "vlucas/phpdotenv": "^5.5"
-    }
+    },
+    "minimum-stability": "dev"
 }
