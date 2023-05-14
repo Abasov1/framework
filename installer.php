@@ -12,6 +12,7 @@ $foldersToMove = [
     'public',
     'requests',
     'routes',
+    'vendor',
     'views',
     '.env',
     '.env.example',
