@@ -12,13 +12,12 @@
             "app\\": "./"
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Abasov1/source.git"
-        }
-    ],
     "require": {
         "vlucas/phpdotenv": "^5.5"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php installer.php"
+        ]
     }
 }
