@@ -13,7 +13,7 @@ class UserRequest extends Request{
 	];
 	
 	public $messages = [
-		'name.required' => 'lazimdi qaqa'		
+		'name.required' => 'Name is requried'		
 	];
 	
 }

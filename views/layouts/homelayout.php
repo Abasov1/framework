@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>anovun</title>
+	<title>Welcome</title>
 </head>
 <body>
 	<div style="width:100%;display:flex;justify-content: center;">
