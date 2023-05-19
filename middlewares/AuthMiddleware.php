@@ -2,10 +2,12 @@
 
 namespace app\middlewares;
 
-class AuthMiddleware{
+use app\core\Middleware;
+
+class AuthMiddleware extends Middleware{
 
 	public function allow(){
-		if(auth()){
+		if(auth()){	
 			return true;
 		}else{
 			return false;

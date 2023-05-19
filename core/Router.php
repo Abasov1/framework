@@ -6,7 +6,6 @@ use app\core\Response;
 use app\core\Application;
 use app\core\Session;
 use app\core\Middleware;
-
 class Router{
 
 	protected $routes = [];
@@ -74,10 +73,64 @@ class Router{
 		$path = $this->request->getPath();
 		$method = $this->request->getMethod();
 		$callback = $this->routes[$method][$path] ?? false;
+		$params = false;
 		if($callback === false){
-			$this->response->setStatusCode(404);
-			echo 'Not Found';
-			die();		
+
+			foreach($this->routes[$method] as $nomur => $valik){
+				$explode = explode("/",$nomur);
+				$p_explode = explode("/",$path);
+				foreach($explode as $key => $value){
+					if(empty($explode[$key])){
+						unset($explode[$key]);
+					}
+				}
+				foreach($p_explode as $key => $value){
+					if(empty($p_explode[$key])){
+						unset($p_explode[$key]);
+					}
+				}
+				if(count($explode) !== count($p_explode)){
+					continue;
+				}
+				$sync = false;
+				$basa = array_diff($p_explode,$explode);
+				foreach($explode as $key => $value){
+					if(isset($p_explode[$key])){
+						$sync = true;
+					}
+				}
+				foreach($basa as $key => $value){
+					$nigga = $explode[$key];
+					if(strpos($explode[$key],'{') === false || strpos($explode[$key],'}') === false){
+						$sync = false;
+					}
+				}
+				if(!$sync){
+					continue;
+				}else{
+					$base = array_diff($p_explode,$explode);
+					$params = [];
+					foreach($base as $acar => $deyer){
+						if(strpos($explode[$acar],'{') === false || strpos($explode[$acar],'}') === false){
+							continue;
+
+						}
+						$replacement = str_replace("{","",$explode[$acar]);
+						$replacement = str_replace("}","",$replacement);
+						$params[$replacement] = $deyer;
+					}
+					if(!empty($params)){
+						$callback = $this->routes[$method][$nomur];
+					}
+					continue;
+				}
+
+			}
+			if($callback === false){
+				$this->response->setStatusCode(404);
+				echo 'Not Found';
+				die();		
+			}
 		}
 		$kernel = include __DIR__."/../middlewares/Kernel.php";
 		if($this->checkAuth()){
@@ -118,12 +171,20 @@ class Router{
 			}
 		}
 		if(is_string($callback)){
-			return $this->renderView($callback);
+			if($params){
+				return $this->renderView($callback,$params);
+			}else{
+				return $this->renderView($callback);
+			}
 		}
 		if(is_array($callback)){
 			$callback[0] = new $callback[0]();
 		}
-		return call_user_func($callback,$this->request);
+		if($params){
+			return call_user_func($callback,$params,$this->request);
+		}else{
+			return call_user_func($callback,$this->request);
+		}
 	}
 
 	public function renderView($view,$params = []){
@@ -167,8 +228,19 @@ class Router{
 				$$key = $value;
 			}
 		}
+		if($this->checkAuth()){
+			$auth = $this->checkAuth();
+		}
 		ob_start();
 		$viewContent = file_get_contents(__DIR__."/../views/$layout.php");
+
+		if(strpos($viewContent, 'auth()')){
+			if(isset($auth)){
+				$viewContent = str_replace('auth()','$auth',$viewContent);
+			}else{
+				$viewContent = str_replace('auth()','',$viewContent);
+			}
+		}
 		$cnt = str_replace('{{{', '<?php echo ', $viewContent);
 		$cnt = str_replace('}}}', '; ?>', $cnt);
 		$cnt = str_replace('@php', '<?php', $cnt);
@@ -217,8 +289,7 @@ class Router{
 			if(isset($auth)){
 				$viewContent = str_replace('auth()','$auth',$viewContent);
 			}else{
-				echo 'Not authenticated';
-				die();
+				$viewContent = str_replace('auth()','',$viewContent);
 			}
 		}
 

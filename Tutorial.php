@@ -11,16 +11,50 @@
 		$app->router->get('/home','home');
 
 		//Redirect to the controller - second parameter
+
 		$app->router->get('/home',[UserController::class,'index']);
 
 		//Use middlewares - third parameter
+
 		$app->router->get('/home',[UserController::class,'index'],['auth','model']);
+
+	//You can also define a parameters with {} for example:
+
+		$app->router->get('/home/{id}','home');
+
+		//If you pass that id to the url you can use it on your view like this:
+
+			@if(isset($id))
+				{{{$id}}}
+			@endif
+
+		//You can also get parameters from the controllers for example:
+
+		$app->router->get('/home/{id}/{name}',[UserController::class,'index']); // Let's say our url is localhost:8000/home/6/maqa
+		
+		class SomeController extends Controller{
+
+			public function index($params){
+				$id = $params['id'];
+				$name = $params['name'];
+
+				echo $id; //returns 6
+				echo $name; //returns maqa
+			}
+
+		}	
 //Views
 
 	//views/
 
 		/*To define layout go into a view and use {{layout-'the directory of layout'}} and then
 		u can use that view with defining it's position in the layout using the {{content-'the directory of your view'}} */
+
+	//Shortcuts
+
+		// We have @if @else @endif , @foreach @endforeach, @auth @endauth, auth() and {{{ }}} - (shortcut for php echo) shortcuts
+
+		// auth() returns the informations of authenticated user
 
 //Models
 
@@ -64,6 +98,8 @@
 		]); //To update a model you gotta give its id
 
 		Something::where('column','value'); //Returns that column
+		
+		Something::all(); //Returns everything
 
 		Something::where('column','value')->delete(); //To delete that column
 
@@ -137,12 +173,16 @@
 
 		$this->back($params); // Go back
 
+		//All parameters are optional
+
 //Middlewares 
 
 	//This is a middleware example:
 		namespace app\middlewares;
 
-		class AuthMiddleware{
+		use app\core\Middleware;
+
+		class AuthMiddleware extends Middleware{
 
 			public function allow(){
 				if(auth()){
@@ -165,6 +205,22 @@
 //Authentication
 
 	// Use auth() to get the authenticated user in middleware or in the view files
+
+	// To authenticate a user 
+
+		use app\core\Auth;
+
+		// Use Auth::login to authenticate
+
+		$credentials = [
+			'email' => 'admin@gmail.com',
+			'password' => 'admin123',
+			'remember' => false
+		];	
+
+		Auth::login($credentials); // You can only give email and password and it only works on users table
+
+		Auth::logout(); // Use this to logout from authenticated user
 
 //Migrations 
 
@@ -196,6 +252,64 @@
 
 			}
 
+//File
 
+	use app\core\File;
+
+	$file = new File('filename'); //do define new file class you can use this and the filename should be the name of the input file
+
+	$file->name(); //Returns the original name of the file
+
+	$file->temp(); //Returns the temporary name of the file
+
+	$file->extension(); //Returns the extension of the file
+
+	$file->size(); //Returns the size of the file
+
+	$file->isFile(); //Check if the file exists or not
+
+	$file->save('img/something.png'); //To save selected file (Make sure that the directory is exists)
+
+	File::delete('img/something.png'); //To delete a file
+
+	//These files are storing inside of public/storage folder
+
+//Asset usage
+
+	/* If you want to use some css or js files you can upload those files inside of public folder and then use it from there. For example
+	 if you have js/index.js inside of pulbic folder you can say */
+  	
+  	<script src="js/index.js">
+
+  	//Make sure in the top of the <head> tag in your base html file you are using 
+
+  	<base href="/">
+
+
+//Support
+
+  	// Session
+
+	  	use app\core\Session;
+
+	  	Session::set($key,$value,$time); // To set a session 
+
+	  	Session::get($key) // To get a value
+
+	  	Session::remove($key) // To end the session
+
+	//Hash 
+
+	  	use app\core\Hash;
+
+	  	$hash = Hash::make('password123'); // To encrypt the value
+
+	  	Hash::verify('password123',$hash); // To check if the ecrypted value is correct
+
+	//Str 
+
+	  	use app\core\Str;
+
+	  	Str::slug('Some stRing'); //Returns some-string
 
 ?>

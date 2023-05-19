@@ -34,6 +34,19 @@ class Model{
 	    $instance->teble = $table;
 	    return $instance->instance;
 	}
+
+	public static function all(){
+		self::connect();
+		$table = self::getTablee();
+		$query = mysqli_query(self::$db,"SELECT * FROM $table");
+		$result = mysqli_fetch_all($query, MYSQLI_ASSOC);
+
+		foreach ($result as &$row) {
+		    $row = (object) $row; // convert each row to an object
+		}
+
+		return $result;
+	}
 	
 	public function delete(){
 		$id = $this->instance->id;
@@ -49,12 +62,6 @@ class Model{
 		foreach ($credentials as $cr => $br) {
 			if(!in_array($cr, self::$fillable)){
 				echo 'couldnt find '.$cr.' in fillable list';
-				die();
-			}
-		}
-		foreach(self::$fillable as $amk){
-			if(!in_array($amk,array_keys($credentials))){
-				echo 'credentials are uncompleted';
 				die();
 			}
 		}
