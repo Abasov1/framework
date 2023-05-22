@@ -12,6 +12,12 @@ class Hash{
 		return password_verify($password, $hash);
 	}
 
+	public static function find($crs){
+		if(isset($crs['password'])){
+			$crs['password'] = password_hash($crs['password'], PASSWORD_DEFAULT);
+		}
+		return $crs;
+	}
 }
 
 

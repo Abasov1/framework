@@ -7,13 +7,7 @@ use app\core\Application;
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-$cfg = [
-	'dsn' => $_ENV['DB'],
-	'user' => $_ENV['DB_USER'],
-	'password' => $_ENV['DB_PASSWORD'],
-	'name' => $_ENV['DB_NAME'],
-];
-$app = new Application($cfg,$_ENV);
+$app = new Application($_ENV);
 
 $app->db->dropAll();
 

@@ -8,7 +8,7 @@ class Auth{
 
 	public static function login($credentials){
 		$error = [];
-		$db = mysqli_connect('localhost',Application::$cfg['user'],Application::$cfg['password'],Application::$cfg['name']);
+		$db = mysqli_connect('localhost',Application::$env['DB_USER'],Application::$env['DB_PASSWORD'],Application::$env['DB_NAME']);
 		$query = mysqli_query($db,"SELECT * FROM users WHERE email = '".$credentials['email']."' ");
 		if(mysqli_num_rows($query) < 1) {
 			$error['email'] = "This email doesn't exists";

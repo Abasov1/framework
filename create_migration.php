@@ -14,7 +14,7 @@ return new class extends Table{
 		$this->tableName("something");
 		$this->id();
 		
-		$this->timestamp();
+		$this->timestamps   ();
 		$this->create();
 	}
 

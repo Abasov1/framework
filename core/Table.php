@@ -66,7 +66,18 @@ class Table{
 		}
 		return $this;
 	}
-	public function timestamp(){
+	public function timestamp($name){
+		if(isset($this->credentials)){
+			$this->value = ",$name";
+			$this->credentials[",$name"] = ",$name TIMESTAMP NOT NULL";
+		}else{
+			$this->value = $name;
+			$this->credentials = [];
+			$this->credentials[$name] = "$name TIMESTAMP NOT NULL";
+		}
+		return $this;
+	}
+	public function timestamps(){
 		if(isset($this->credentials)){
 			$this->value = 'time';
 			$this->credentials['time'] = ",created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP";

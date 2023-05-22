@@ -7,11 +7,11 @@ use app\migrations\Jahrein;
 class Database{
 	public \PDO $pdo;
 
-	public function __construct($cfg){
+	public function __construct($env){
 
-		$dsn = $cfg['dsn'];
-		$user = $cfg['user'];
-		$password = $cfg['password'];
+		$dsn = $env['DB'];
+		$user = $env['DB_USER'];
+		$password = $env['DB_PASSWORD'];
 
 		$this->pdo = new \PDO($dsn,$user,$password);
 		$this->pdo->setAttribute(\PDO::ATTR_ERRMODE,\PDO::ERRMODE_EXCEPTION);

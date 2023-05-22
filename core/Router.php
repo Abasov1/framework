@@ -38,7 +38,7 @@ class Router{
 				echo 'Middleware should be array or string';
 				die();
 			}
-		}
+		} 
 		$this->routes['get'][$path] = $callback;
 		return $this;
 	}
@@ -197,7 +197,7 @@ class Router{
 		if(isset($matches[1])){
 			$layout = $matches[1];
 			$viewcontent = preg_replace($pattern, "", $viewcontent);
-			$layoutcontent = $this->layoutContent($layout);
+			$layoutcontent = $this->layoutContent($layout,$params);
 			if(strpos($layoutcontent, '{{content-'.$view.'')){
 				$nani = true;
 				$layoutcontent =  str_replace('{{content-'.$view.'}}', $viewcontent, $layoutcontent);
@@ -217,7 +217,35 @@ class Router{
 		}
 	}
 
-	public function layoutContent($layout){
+	public function returnView($view,$params = []){
+		$nani = false;
+		$viewcontent = $this->renderOnlyView($view,$params);
+		$pattern = '/{{layout-(.*?)}}/';
+		preg_match($pattern, $viewcontent, $matches);
+		if(isset($matches[1])){
+			$layout = $matches[1];
+			$viewcontent = preg_replace($pattern, "", $viewcontent);
+			$layoutcontent = $this->layoutContent($layout,$params);
+			if(strpos($layoutcontent, '{{content-'.$view.'')){
+				$nani = true;
+				$layoutcontent =  str_replace('{{content-'.$view.'}}', $viewcontent, $layoutcontent);
+			}
+			$layoutcontent = str_replace('{{{','<?php',$layoutcontent);
+			$layoutcontent = str_replace('}}}',';?>',$layoutcontent);
+			$pattern = '/{{content-(.*?)}}/';
+			$layoutcontent = preg_replace($pattern, '', $layoutcontent);
+		}
+		if($this->checkMessages() !== false){
+			$this->unsetMessages();
+		}
+		if($nani){
+			return $layoutcontent;	
+		}else{
+			return $viewcontent;
+		}
+	}
+
+	public function layoutContent($layout,$params){
 		if(!empty($params)){
 			foreach ($params as $key => $value) {
 				$$key = $value;
@@ -230,21 +258,50 @@ class Router{
 		}
 		if($this->checkAuth()){
 			$auth = $this->checkAuth();
+		}else{
+			$auth = null;
 		}
 		ob_start();
 		$viewContent = file_get_contents(__DIR__."/../views/$layout.php");
 
-		if(strpos($viewContent, 'auth()')){
-			if(isset($auth)){
-				$viewContent = str_replace('auth()','$auth',$viewContent);
-			}else{
-				$viewContent = str_replace('auth()','',$viewContent);
-			}
-		}
+		
 		$cnt = str_replace('{{{', '<?php echo ', $viewContent);
 		$cnt = str_replace('}}}', '; ?>', $cnt);
+		$cnt = str_replace('auth()', '$auth', $cnt);
 		$cnt = str_replace('@php', '<?php', $cnt);
 		$cnt = str_replace('@endphp', '?>', $cnt);
+		$pattern = '/@include\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
+		preg_match_all($pattern, $cnt, $matches);
+		$includeFiles = $matches[1];
+		if(isset($includeFiles)){
+			foreach($includeFiles as $fil){
+				$repak = $this->renderOnlyView($fil,$params);
+				$pattern = '/{{layout-(.*?)}}/';
+				preg_match_all($pattern, $repak, $matches);
+				if(isset($matches[1])){
+					foreach($matches[1] as $mat){
+						$repak = str_replace("{{layout-$mat}}","",$repak);
+					}
+				}
+				$pattern = '/{{content-(.*?)}}/';
+				preg_match_all($pattern, $repak, $matches);
+				if(isset($matches[1])){
+					foreach($matches[1] as $mat){
+						$repak = str_replace("{{content-$mat}}","",$repak);
+					}
+				}
+				$cnt = str_replace("@include($fil)",$repak,$cnt);
+			}
+		}
+		$pattern = '/@isset\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
+		$replacement = '<?php if(isset($1)) { ?>';
+		$cnt = preg_replace($pattern, $replacement, $cnt);
+		$pattern = '/@error\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
+		$replacement = '<?php if(isset($error[$1])) { ?>';
+		$cnt = preg_replace($pattern, $replacement, $cnt);
+		$pattern = '/@old\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
+		$replacement = '<?php if(isset($old[$1])){ echo $old[$1]; } ?>';
+		$cnt = preg_replace($pattern, $replacement, $cnt);
 		$pattern = '/@foreach\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
 		$replacement = '<?php foreach($1) { ?>';
 		$cnt = preg_replace($pattern, $replacement, $cnt);
@@ -256,14 +313,18 @@ class Router{
 		$replacement = '<?php }elseif($1) { ?>';
 		$cnt = preg_replace($pattern, $replacement, $cnt);
 		$cnt = str_replace('@else', '<?php }else{ ?>', $cnt);
-		$cnt = str_replace('@endif', '<?php } ?>', $cnt);
 		if(!$this->checkAuth()){
 			$pattern = '/@auth.*?@endauth\s*/s';
 			$cnt = preg_replace($pattern, '', $cnt);
+			$cnt = str_replace('@guest','',$cnt);
+			$cnt = str_replace('@endguest','',$cnt);
 		}else{
+			$pattern = '/@guest.*?@endguest\s*/s';
+			$cnt = preg_replace($pattern, '', $cnt);
 			$cnt = str_replace('@auth','',$cnt);
 			$cnt = str_replace('@endauth','',$cnt);
 		}
+		$cnt = str_replace('@end', '<?php } ?>', $cnt);
 		eval('?>' . $cnt);
 		return ob_get_clean();
 	}
@@ -281,22 +342,50 @@ class Router{
 		}
 		if($this->checkAuth()){
 			$auth = $this->checkAuth();
+		}else{
+			$auth = null;
 		}
 		ob_start();
 		$viewContent = file_get_contents(__DIR__."/../views/$view.php");
 
-		if(strpos($viewContent, 'auth()')){
-			if(isset($auth)){
-				$viewContent = str_replace('auth()','$auth',$viewContent);
-			}else{
-				$viewContent = str_replace('auth()','',$viewContent);
-			}
-		}
-
+		
 		$cnt = str_replace('{{{', '<?php echo ', $viewContent);
 		$cnt = str_replace('}}}', '; ?>', $cnt);
+		$cnt = str_replace('auth()', '$auth', $cnt);
 		$cnt = str_replace('@php', '<?php', $cnt);
 		$cnt = str_replace('@endphp', '?>', $cnt);
+		$pattern = '/@include\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
+		preg_match_all($pattern, $cnt, $matches);
+		$includeFiles = $matches[1];
+		if(isset($includeFiles)){
+			foreach($includeFiles as $fil){
+				$repak = $this->renderOnlyView($fil,$params);
+				$pattern = '/{{layout-(.*?)}}/';
+				preg_match_all($pattern, $repak, $matches);
+				if(isset($matches[1])){
+					foreach($matches[1] as $mat){
+						$repak = str_replace("{{layout-$mat}}","",$repak);
+					}
+				}
+				$pattern = '/{{content-(.*?)}}/';
+				preg_match_all($pattern, $repak, $matches);
+				if(isset($matches[1])){
+					foreach($matches[1] as $mat){
+						$repak = str_replace("{{content-$mat}}","",$repak);
+					}
+				}
+				$cnt = str_replace("@include($fil)",$repak,$cnt);
+			}
+		}
+		$pattern = '/@isset\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
+		$replacement = '<?php if(isset($1)) { ?>';
+		$cnt = preg_replace($pattern, $replacement, $cnt);
+		$pattern = '/@error\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
+		$replacement = '<?php if(isset($error[$1])) { ?>';
+		$cnt = preg_replace($pattern, $replacement, $cnt);
+		$pattern = '/@old\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
+		$replacement = '<?php if(isset($old[$1])){ echo $old[$1]; } ?>';
+		$cnt = preg_replace($pattern, $replacement, $cnt);
 		$pattern = '/@foreach\(([^()]*+(?:\((?1)\)[^()]*)*+)\)/s';
 		$replacement = '<?php foreach($1) { ?>';
 		$cnt = preg_replace($pattern, $replacement, $cnt);
@@ -308,14 +397,18 @@ class Router{
 		$replacement = '<?php }elseif($1) { ?>';
 		$cnt = preg_replace($pattern, $replacement, $cnt);
 		$cnt = str_replace('@else', '<?php }else{ ?>', $cnt);
-		$cnt = str_replace('@endif', '<?php } ?>', $cnt);
 		if(!$this->checkAuth()){
 			$pattern = '/@auth.*?@endauth\s*/s';
 			$cnt = preg_replace($pattern, '', $cnt);
+			$cnt = str_replace('@guest','',$cnt);
+			$cnt = str_replace('@endguest','',$cnt);
 		}else{
+			$pattern = '/@guest.*?@endguest\s*/s';
+			$cnt = preg_replace($pattern, '', $cnt);
 			$cnt = str_replace('@auth','',$cnt);
 			$cnt = str_replace('@endauth','',$cnt);
 		}
+		$cnt = str_replace('@end', '<?php } ?>', $cnt);
 		eval('?>' . $cnt);
 		return ob_get_clean();
 	}
@@ -323,7 +416,7 @@ class Router{
 	public function checkAuth(){
 		if(Session::get('USER')){
 			$user = Session::get('USER');
-			$db = mysqli_connect('localhost',Application::$cfg['user'],Application::$cfg['password'],Application::$cfg['name']);
+			$db = mysqli_connect('localhost',Application::$env['DB_USER'],Application::$env['DB_PASSWORD'],Application::$env['DB_NAME']);
 			$query = mysqli_query($db,"SELECT * FROM users WHERE email = '".$user->email."' AND password = '".$user->password."' ");
 			if (mysqli_num_rows($query) > 0) {
 			    return $user;

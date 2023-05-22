@@ -15,7 +15,7 @@ class Request{
 	public static $db;
 
 	public static function connect(){
-		self::$db = mysqli_connect('localhost',Application::$cfg['user'],Application::$cfg['password'],Application::$cfg['name']);
+		self::$db = mysqli_connect('localhost',Application::$env['DB_USER'],Application::$env['DB_PASSWORD'],Application::$env['DB_NAME']);
 	}
 
 	public static $error = false;

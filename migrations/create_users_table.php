@@ -11,7 +11,7 @@ return new class extends Table{
 		$this->string('name');
 		$this->string('email');
 		$this->string('password');
-		$this->timestamp();
+		$this->timestamps();
 		$this->create();
 	}
 

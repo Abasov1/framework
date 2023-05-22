@@ -25,7 +25,7 @@ class Middleware{
 		if($messages){
 			Session::set('REDIRECT_MESSAGES',$messages,60);
 		}
-		$rut = $_SERVER['HTTP_REFERER']; 
+		$rut = $_SERVER['HTTP_REFERER'] ?? Application::$env['APPLICATION_URL'];  
 		header("Location: $rut");
 		die();
 	}

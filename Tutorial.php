@@ -24,9 +24,9 @@
 
 		//If you pass that id to the url you can use it on your view like this:
 
-			@if(isset($id))
+			@isset($id)
 				{{{$id}}}
-			@endif
+			@end
 
 		//You can also get parameters from the controllers for example:
 
@@ -52,8 +52,9 @@
 
 	//Shortcuts
 
-		// We have @if @else @endif , @foreach @endforeach, @auth @endauth, auth() and {{{ }}} - (shortcut for php echo) shortcuts
-
+		/* We have @if @elseif @else @end, @isset @end, @error @end, @old @end, @foreach @end, @include,@php @endphp, @auth @endauth,
+		 @guest @endguest, auth() and {{{ }}} - (shortcut for php echo) shortcuts */
+			
 		// auth() returns the informations of authenticated user
 
 //Models
@@ -63,22 +64,13 @@
 		use app\core\Model;
 
 		class Something extends Model{
-			public static $fillable = [
+			public $fillable = [
 				'colum1',
 				'colum2',
 				'colum3',
 			];
 			
-			public static $table = 'something';
-
-			public static function getTable($par){
-				return self::$table;
-			}
-			
-			public static function getFillable($par){
-				return self::$fillable;
-			}
-
+			public $table = 'something';
 
 		}
 
@@ -104,7 +96,7 @@
 		Something::where('column','value')->delete(); //To delete that column
 
 //Validation
-	// There are only 4 validation rules: required,min,max and unique
+	// There are only 4 validation rules: required, min, max, email and unique
 	
 	// app\core\Request
 
@@ -114,7 +106,7 @@
 
 		Request::validate($credentials,[
 			'name' => ['required','min:6','max:10'],
-			'email' => ['required','unique:users'],
+			'email' => ['required','email','unique:users'],
 			'password' => ['required','min:6']
 		],[
 			'name.required' => 'Name is required'			
@@ -125,7 +117,7 @@
 	//If you want to ignore that column when using unique you gotta give its id
 		'email' => ['unique:users,'.$id]
 
-	//And if you want to create your own validation rule this is the example for it:
+	//And if you want to create your own validation method: //requests/
 		namespace app\requests;
 
 		use app\core\Request;
@@ -145,7 +137,7 @@
 		}
 
 		//And then you can use it just by passing the credentials inside of it like this:
-			UserRequest::validate($body);
+			UserRequest::validate($credentials);
 
 //Controllers
 
@@ -240,9 +232,10 @@
 					$this->id(); 
 					$this->string('name')->default('something');
 					$this->string('email');
+					$this->timestamp('email_verified_at')->nullable();
 					$this->string('password');
 					$this->integer('age',3)->default(18)->nullable();
-					$this->timestamp();
+					$this->timestamps();
 					$this->create(); //To create the table
 				}
 
@@ -281,7 +274,7 @@
   	
   	<script src="js/index.js">
 
-  	//Make sure in the top of the <head> tag in your base html file you are using 
+  	//Make sure in the <head> tag in your main html file you are using 
 
   	<base href="/">
 
@@ -296,13 +289,15 @@
 
 	  	Session::get($key) // To get a value
 
-	  	Session::remove($key) // To end the session
+	  	Session::remove($key) // To remove the value
 
 	//Hash 
 
 	  	use app\core\Hash;
 
 	  	$hash = Hash::make('password123'); // To encrypt the value
+	  	
+	  	$hash = Hash::find($credentials); // Hashes the $credentials['password'] and returns new array with hashed password
 
 	  	Hash::verify('password123',$hash); // To check if the ecrypted value is correct
 
@@ -311,5 +306,37 @@
 	  	use app\core\Str;
 
 	  	Str::slug('Some stRing'); //Returns some-string
+
+	  	Str::random(8); //Returns a random string with a length of 8
+
+	//Time
+
+	  	use app\core\Time;
+
+	  	$date = new Time();
+
+	  	$date->add(60*60*24*7); // Add seconds 
+	  	
+	  	$date->addMinutes(60*24*7); // Add minutes 
+	  	
+	  	$date->addHours(24*7); // Add hours 
+
+	  	$date->format("Y-m-d H:i:s"); // To define the format
+
+	//Mail
+
+	  	use app\core\Mail;
+
+	  	//To send an email, ensure that you have properly configured all the required parameters in the .env file
+
+	  	Mail::send('example@gmail.com','layouts/homelayout',['name'=>'john'],'Example Subject');
+
+	  	//First parameter - email address - required
+
+	  	//Second parameter - the view file (it should be inside of the views folder) - requried
+
+	  	//Third parameter - the parameters for the view file - optional
+
+	  	//Fourth parameter - The subject of email - optional - default "Your Subject"
 
 ?>

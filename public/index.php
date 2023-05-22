@@ -10,14 +10,7 @@ use app\routes\Route;
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->load();
 
-$cfg = [
-	'dsn' => $_ENV['DB'],
-	'user' => $_ENV['DB_USER'],
-	'password' => $_ENV['DB_PASSWORD'],
-	'name' => $_ENV['DB_NAME'],
-];
-
-$app = new Application($cfg,$_ENV);
+$app = new Application($_ENV);
 
 $route = new Route($app);
 
