@@ -1,6 +1,6 @@
 {
     "name": "abasov1/mvc_framework",
-    "type":"library",
+    "type":"project",
     "license":"MIT",
     "authors": [
         {
