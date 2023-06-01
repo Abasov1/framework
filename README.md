@@ -8,5 +8,5 @@ cd public <br>
 php -S localhost:8000 <br>
 cd.. <br>
 <br>
-Make sure you are using your own table in .env file <br>
+Make sure you've set up everything in .env file <br>
 It's literally my biggest failure

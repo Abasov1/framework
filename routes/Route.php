@@ -3,7 +3,7 @@
 namespace app\routes;
 
 use app\core\Application;
-use app\controllers\UserController;
+use app\controllers\Base;
 
 class Route{
 
